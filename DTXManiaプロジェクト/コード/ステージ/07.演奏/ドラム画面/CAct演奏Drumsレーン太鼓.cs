@@ -26,6 +26,7 @@ namespace DTXMania
             for (int i = 0; i < 4; i++)
             {
                 this.st状態[i].ct進行 = new CCounter();
+                this.st状態[i].ctflash = new CCounter();
                 this.stBranch[i].ct分岐アニメ進行 = new CCounter();
                 this.stBranch[i].nフラッシュ制御タイマ = -1;
                 this.stBranch[i].nBranchレイヤー透明度 = 0;
@@ -49,6 +50,7 @@ namespace DTXMania
             for (int i = 0; i < 4; i++)
             {
                 this.st状態[i].ct進行 = null;
+                this.st状態[i].ctflash = null;
                 this.stBranch[i].ct分岐アニメ進行 = null;
             }
             CDTXMania.Skin.nScrollFieldX[0] = this.nDefaultJudgePos[0];
@@ -785,6 +787,39 @@ namespace DTXMania
                 }
             }
             #endregion
+
+            #region 判定時フラッシュ
+            for (int i = 0; i < CDTXMania.ConfigIni.nPlayerCount; i++)
+            {
+                if (!this.st状態[i].ctflash.b停止中)
+                {
+                    this.st状態[i].ctflash.t進行();
+                    if (this.st状態[i].ctflash.b終了値に達した)
+                    {
+                        this.st状態[i].ctflash.t停止();
+                    }
+                    int numf = 665 - (this.st状態[i].ctflash.n現在の値 * 5); ;
+                    switch (st状態[i].judge)
+                    {
+                        case E判定.Perfect:
+                        case E判定.Great:
+                        case E判定.Auto:
+                        case E判定.Good:
+                            if (CDTXMania.Tx.Lane_Yellow != null)
+                            {
+                                CDTXMania.Tx.Lane_Yellow.n透明度 = (numf);
+                                CDTXMania.Tx.Lane_Yellow.t2D描画(CDTXMania.app.Device, 333, CDTXMania.Skin.nScrollFieldY[i]);
+                            }
+                            break;
+                        case E判定.Miss:
+                        case E判定.Bad:
+                            break;
+                    }
+                }
+            }
+            #endregion
+
+            #region Hitエフェクト
             for (int i = 0; i < CDTXMania.ConfigIni.nPlayerCount; i++)
             {
                 if (!this.st状態[i].ct進行.b停止中)
@@ -798,25 +833,37 @@ namespace DTXMania
                     {
                         //this.txアタックエフェクトLower.b加算合成 = true;
                         int n = this.st状態[i].nIsBig == 1 ? 520 : 0;
-
+                        int numf = (((150 - this.st状態[i].ctflash.n現在の値) * 0xff) / 100); ;
                         switch (st状態[i].judge)
                         {
                             case E判定.Perfect:
                             case E判定.Great:
                             case E判定.Auto:
                                 //this.txアタックエフェクトLower.t2D描画( CDTXMania.app.Device, 285, 127, new Rectangle( this.st状態[ i ].ct進行.n現在の値 * 260, n, 260, 260 ) );
-                                if (this.st状態[i].nIsBig == 1 && CDTXMania.Tx.Effects_Hit_Great_Big[this.st状態[i].ct進行.n現在の値] != null)
-                                    CDTXMania.Tx.Effects_Hit_Great_Big[this.st状態[i].ct進行.n現在の値].t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Great_Big[0].szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Great_Big[0].szテクスチャサイズ.Width / 2);
-                                else if (CDTXMania.Tx.Effects_Hit_Great[this.st状態[i].ct進行.n現在の値] != null)
-                                    CDTXMania.Tx.Effects_Hit_Great[this.st状態[i].ct進行.n現在の値].t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Great[0].szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Great[0].szテクスチャサイズ.Width / 2);
+                                if (this.st状態[i].nIsBig == 1 && CDTXMania.Tx.Effects_Hit_Great_Big != null)
+                                {
+                                    CDTXMania.Tx.Effects_Hit_Great_Big.n透明度 = 255 - (this.st状態[i].ct進行.n現在の値 - 68);
+                                    CDTXMania.Tx.Effects_Hit_Great_Big.t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Great_Big.szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Great_Big.szテクスチャサイズ.Width / 2);
+                                }
+                                else if (CDTXMania.Tx.Effects_Hit_Great != null)
+                                {
+                                    CDTXMania.Tx.Effects_Hit_Great.n透明度 = 255 - (this.st状態[i].ct進行.n現在の値 - 68);
+                                    CDTXMania.Tx.Effects_Hit_Great.t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Great.szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Great.szテクスチャサイズ.Width / 2);
+                                }
                                 break;
 
                             case E判定.Good:
                                 //this.txアタックエフェクトLower.t2D描画( CDTXMania.app.Device, 285, 127, new Rectangle( this.st状態[ i ].ct進行.n現在の値 * 260, n + 260, 260, 260 ) );
-                                if (this.st状態[i].nIsBig == 1 && CDTXMania.Tx.Effects_Hit_Good_Big[this.st状態[i].ct進行.n現在の値] != null)
-                                    CDTXMania.Tx.Effects_Hit_Good_Big[this.st状態[i].ct進行.n現在の値].t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Good_Big[0].szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Good_Big[0].szテクスチャサイズ.Width / 2);
-                                else if (CDTXMania.Tx.Effects_Hit_Good[this.st状態[i].ct進行.n現在の値] != null)
-                                    CDTXMania.Tx.Effects_Hit_Good[this.st状態[i].ct進行.n現在の値].t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Good[0].szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Good[0].szテクスチャサイズ.Width / 2);
+                                if (this.st状態[i].nIsBig == 1 && CDTXMania.Tx.Effects_Hit_Good_Big != null)
+                                {
+                                    CDTXMania.Tx.Effects_Hit_Good_Big.n透明度 = 255 - (this.st状態[i].ct進行.n現在の値 - 68);
+                                    CDTXMania.Tx.Effects_Hit_Good_Big.t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Good_Big.szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Good_Big.szテクスチャサイズ.Width / 2);
+                                }
+                                else if (CDTXMania.Tx.Effects_Hit_Good != null)
+                                {
+                                    CDTXMania.Tx.Effects_Hit_Good.n透明度 = 255 - (this.st状態[i].ct進行.n現在の値 - 68);
+                                    CDTXMania.Tx.Effects_Hit_Good.t2D描画(CDTXMania.app.Device, CDTXMania.Skin.nScrollFieldX[0] - CDTXMania.Tx.Effects_Hit_Good.szテクスチャサイズ.Width / 2, CDTXMania.Skin.nJudgePointY[i] - CDTXMania.Tx.Effects_Hit_Good.szテクスチャサイズ.Width / 2);
+                                }
                                 break;
 
                             case E判定.Miss:
@@ -826,7 +873,7 @@ namespace DTXMania
                     }
                 }
             }
-
+            #endregion
 
         }
 
