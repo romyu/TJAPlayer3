@@ -883,7 +883,8 @@ namespace DTXMania
 
             //for( int n = 0; n < 1; n++ )
             {
-                this.st状態[nPlayer].ct進行 = new CCounter(0, 14, 20, CDTXMania.Timer);
+                this.st状態[nPlayer].ct進行 = new CCounter(0, 333, 1, CDTXMania.Timer);
+                this.st状態[nPlayer].ctflash = new CCounter(0, 133, 1, CDTXMania.Timer);
                 this.st状態[nPlayer].judge = judge;
                 this.st状態[nPlayer].nPlayer = nPlayer;
 
@@ -1009,6 +1010,7 @@ namespace DTXMania
         {
             public bool b使用中;
             public CCounter ct進行;
+            public CCounter ctflash;
             public E判定 judge;
             public int nIsBig;
             public int n透明度;
